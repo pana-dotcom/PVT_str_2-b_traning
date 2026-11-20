@@ -4,51 +4,185 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PVT・2-back・Stroop 統合課題</title>
+
 <style>
-  body{font-family:Arial,sans-serif;text-align:center;margin:0;padding:40px 16px;color:#111}
-  #startOverlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:white;font-size:28px;font-weight:bold;user-select:none}
-  #title{min-height:0;margin:0}
-  #stage{width:100%;margin:auto;display:flex;flex-direction:column;align-items:center}
-  #stimulus{display:flex;align-items:center;justify-content:center;line-height:1;box-sizing:border-box;user-select:none}
+body{
+  font-family:Arial,sans-serif;
+  text-align:center;
+  margin:0;
+  padding:40px 16px;
+  color:#111;
+}
 
-  /* PVT: 元コードと同じ300×200 pxの灰色ボックス */
-  #stimulus.pvt-waiting{width:300px;height:200px;background:gray;color:white;font-size:80px;margin:auto}
-  #stimulus.pvt-red{width:300px;height:200px;background:red;color:white;font-size:40px;margin:auto}
+#startOverlay{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:white;
+  font-size:28px;
+  font-weight:bold;
+  user-select:none;
+}
 
-  /* 2-back: 元コードと同じ120×120 px、灰色・白文字・角丸 */
-  #stimulus.twoback-fixation{width:120px;height:120px;margin:30px auto 16px;background:gray;color:white;border-radius:10px;font-size:80px}
-  #stimulus.twoback-letter{width:120px;height:120px;margin:30px auto 16px;background:transparent;color:#111;border-radius:0;font-size:80px}
+#title{
+  min-height:0;
+  margin:0;
+}
 
-  /* Stroop: 元コードと同じ固定高80 pxの刺激表示領域 */
-  #stimulus.stroop{width:100%;height:80px;margin:40px auto;font-family:sans-serif;font-size:64px;font-weight:normal;background:transparent;color:#111}
+#stage{
+  width:100%;
+  margin:auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
 
-  #message{min-height:36px;margin-top:18px;font-size:20px;font-weight:normal}
-  #countdown{min-height:58px;margin-top:8px;font-size:48px;font-weight:bold}
-  #keymap{display:none;margin-top:40px;flex-direction:column;align-items:center}
-  .arrow-row{display:flex;justify-content:center}.keybox{width:90px;height:70px;margin:5px;display:flex;justify-content:center;align-items:center;border:3px solid #333;border-radius:10px;font-size:26px;font-weight:bold}
+#stimulus{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+  box-sizing:border-box;
+  user-select:none;
+}
+
+/* PVT: 元コードと同じ300×200 pxの灰色ボックス */
+#stimulus.pvt-waiting{
+  width:300px;
+  height:200px;
+  background:gray;
+  color:white;
+  font-size:80px;
+  margin:auto;
+}
+
+#stimulus.pvt-red{
+  width:300px;
+  height:200px;
+  background:red;
+  color:white;
+  font-size:40px;
+  margin:auto;
+}
+
+/* 2-back: 元コードと同じ120×120 px、灰色・白文字・角丸 */
+#stimulus.twoback-fixation{
+  width:120px;
+  height:120px;
+  margin:30px auto 16px;
+  background:gray;
+  color:white;
+  border-radius:10px;
+  font-size:80px;
+}
+
+#stimulus.twoback-letter{
+  width:120px;
+  height:120px;
+  margin:30px auto 16px;
+  background:transparent;
+  color:#111;
+  border-radius:0;
+  font-size:80px;
+}
+
+/* Stroop: 元コードと同じ固定高80 pxの刺激表示領域 */
+#stimulus.stroop{
+  width:100%;
+  height:80px;
+  margin:40px auto;
+  font-family:sans-serif;
+  font-size:64px;
+  font-weight:normal;
+  background:transparent;
+  color:#111;
+}
+
+#message{
+  min-height:36px;
+  margin-top:18px;
+  font-size:20px;
+  font-weight:normal;
+}
+
+#countdown{
+  min-height:58px;
+  margin-top:8px;
+  font-size:48px;
+  font-weight:bold;
+}
+
+#keymap{
+  display:none;
+  margin-top:40px;
+  flex-direction:column;
+  align-items:center;
+}
+
+.arrow-row{
+  display:flex;
+  justify-content:center;
+}
+
+.keybox{
+  width:90px;
+  height:70px;
+  margin:5px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  border:3px solid #333;
+  border-radius:10px;
+  font-size:26px;
+  font-weight:bold;
+}
 </style>
 </head>
+
 <body>
-<div id="startOverlay">Enterキーを押して待機を開始してください</div>
+
+<div id="startOverlay">
+  Enterキーを押して待機を開始してください
+</div>
+
 <h1 id="title"></h1>
+
 <div id="stage">
   <div id="stimulus" class="pvt-waiting">✖</div>
   <div id="countdown"></div>
   <div id="message"></div>
+
   <div id="keymap">
-    <div class="arrow-row"><div class="keybox">赤</div></div>
-    <div class="arrow-row"><div class="keybox">青</div><div class="keybox">黄</div><div class="keybox">緑</div></div>
+    <div class="arrow-row">
+      <div class="keybox">赤</div>
+    </div>
+
+    <div class="arrow-row">
+      <div class="keybox">青</div>
+      <div class="keybox">黄</div>
+      <div class="keybox">緑</div>
+    </div>
   </div>
 </div>
+
 <script>
 'use strict';
 
 /* ==================================================
    共通設定
 ================================================== */
+
 const PREPARATION_DURATION = 30000;
 const COUNTDOWN_DURATION = 5000;
 const BETWEEN_PHASES_DURATION = 2000;
+
+/* 最初のEnterおよび各課題終了時の音 */
+const EVENT_TONE_FREQUENCY = 880;
+const EVENT_TONE_DURATION = 600;
+const EVENT_TONE_VOLUME = .22;
 
 const titleDiv = document.getElementById('title');
 const stimulusDiv = document.getElementById('stimulus');
@@ -68,375 +202,1179 @@ function clearCommonTimers(){
   clearInterval(countdownInterval);
   clearTimeout(preparationStartTimer);
   clearTimeout(preparationEndTimer);
-  countdownInterval = preparationStartTimer = preparationEndTimer = null;
+
+  countdownInterval = null;
+  preparationStartTimer = null;
+  preparationEndTimer = null;
 }
+
 function setPVTWaiting(){
-  stimulusDiv.className='pvt-waiting';
-  stimulusDiv.textContent='✖';
-  stimulusDiv.style.color='white';
+  stimulusDiv.className = 'pvt-waiting';
+  stimulusDiv.textContent = '✖';
+  stimulusDiv.style.color = 'white';
 }
+
 function setTwoBackFixation(){
-  stimulusDiv.className='twoback-fixation';
-  stimulusDiv.textContent='✖';
-  stimulusDiv.style.color='white';
+  stimulusDiv.className = 'twoback-fixation';
+  stimulusDiv.textContent = '✖';
+  stimulusDiv.style.color = 'white';
 }
+
 function setStroopFixation(){
-  stimulusDiv.className='stroop';
-  stimulusDiv.textContent='✖';
-  stimulusDiv.style.color='black';
+  stimulusDiv.className = 'stroop';
+  stimulusDiv.textContent = '✖';
+  stimulusDiv.style.color = 'black';
 }
+
 function setPreparationAppearance(taskName){
-  if(taskName==='PVT練習テスト'){
-    titleDiv.textContent='';
+  if(taskName === 'PVT練習テスト'){
+    titleDiv.textContent = '';
     setPVTWaiting();
-    messageDiv.style.fontSize='20px';
-    messageDiv.style.fontWeight='normal';
-  }else if(taskName==='2-back'){
-    titleDiv.textContent='2-back';
-    titleDiv.style.fontSize='24px';
-    titleDiv.style.margin='0';
+
+    messageDiv.style.fontSize = '20px';
+    messageDiv.style.fontWeight = 'normal';
+
+  }else if(taskName === '2-back'){
+    titleDiv.textContent = '2-back';
+    titleDiv.style.fontSize = '24px';
+    titleDiv.style.margin = '0';
+
     setTwoBackFixation();
-    messageDiv.style.fontSize='18px';
-    messageDiv.style.fontWeight='normal';
+
+    messageDiv.style.fontSize = '18px';
+    messageDiv.style.fontWeight = 'normal';
+
   }else{
-    titleDiv.textContent='Stroopテスト';
-    titleDiv.style.fontSize='36px';
-    titleDiv.style.margin='0';
+    titleDiv.textContent = 'Stroopテスト';
+    titleDiv.style.fontSize = '36px';
+    titleDiv.style.margin = '0';
+
     setStroopFixation();
-    messageDiv.style.fontSize='24px';
-    messageDiv.style.fontWeight='bold';
+
+    messageDiv.style.fontSize = '24px';
+    messageDiv.style.fontWeight = 'bold';
   }
 }
+
 function getAudioContext(){
   if(!audioContext){
     const C = window.AudioContext || window.webkitAudioContext;
-    if(C) audioContext = new C();
+
+    if(C){
+      audioContext = new C();
+    }
   }
+
   return audioContext;
 }
+
 async function unlockAudio(){
   const c = getAudioContext();
-  if(!c) throw new Error('音声機能を利用できません。');
-  if(c.state !== 'running') await c.resume();
-  const o=c.createOscillator(), g=c.createGain();
-  g.gain.setValueAtTime(.0001,c.currentTime);
-  o.connect(g); g.connect(c.destination);
-  o.start(c.currentTime); o.stop(c.currentTime+.02);
-}
-async function playTone(frequency,durationMs,volume=.22){
-  try{
-    const c=getAudioContext(); if(!c)return false;
-    if(c.state!=='running')await c.resume();
-    const o=c.createOscillator(),g=c.createGain(),n=c.currentTime,d=durationMs/1000;
-    const attack=Math.min(.08,d*.25),release=Math.min(.22,d*.45);
-    o.type='sine'; o.frequency.setValueAtTime(frequency,n);
-    g.gain.setValueAtTime(.0001,n);
-    g.gain.exponentialRampToValueAtTime(volume,n+attack);
-    g.gain.setValueAtTime(volume,n+Math.max(attack,d-release));
-    g.gain.exponentialRampToValueAtTime(.0001,n+d);
-    o.connect(g); g.connect(c.destination); o.start(n); o.stop(n+d);
-    return true;
-  }catch(e){console.error(e);return false;}
-}
-function startCountdown(){
-  void playTone(659.25,500,.20);
-  messageDiv.textContent='';
-  let n=5; countdownDiv.textContent=n;
-  countdownInterval=setInterval(()=>{
-    n--; countdownDiv.textContent=n>0?n:'';
-    if(n<=0){clearInterval(countdownInterval);countdownInterval=null;}
-  },1000);
-}
-function beginPreparation(taskName,nextFunction){
-  clearCommonTimers();
-  phase='preparation';
-  keymapDiv.style.display='none';
-  setPreparationAppearance(taskName);
-  countdownDiv.textContent='';
-  messageDiv.textContent='開始まで注視点を見て待機してください';
-  preparationStartTimer=setTimeout(startCountdown,PREPARATION_DURATION-COUNTDOWN_DURATION);
-  preparationEndTimer=setTimeout(()=>{
-    clearInterval(countdownInterval);
-    countdownDiv.textContent=''; messageDiv.textContent='';
-    void playTone(880,600,.22);
-    nextFunction();
-  },PREPARATION_DURATION);
-}
-function transitionTo(nextPreparation){
-  phase='transition';
-  keymapDiv.style.display='none';
-  titleDiv.textContent='';
-  stimulusDiv.className='stroop';
-  stimulusDiv.textContent='終了';
-  stimulusDiv.style.color='#111';
-  messageDiv.textContent=''; countdownDiv.textContent='';
-  setTimeout(nextPreparation,BETWEEN_PHASES_DURATION);
+
+  if(!c){
+    throw new Error('音声機能を利用できません。');
+  }
+
+  if(c.state !== 'running'){
+    await c.resume();
+  }
+
+  const o = c.createOscillator();
+  const g = c.createGain();
+
+  g.gain.setValueAtTime(.0001, c.currentTime);
+
+  o.connect(g);
+  g.connect(c.destination);
+
+  o.start(c.currentTime);
+  o.stop(c.currentTime + .02);
 }
 
-document.addEventListener('keydown',async e=>{
-  if(e.key!=='Enter'||e.repeat||phase!=='initial')return;
+async function playTone(frequency, durationMs, volume = .22){
+  try{
+    const c = getAudioContext();
+
+    if(!c){
+      return false;
+    }
+
+    if(c.state !== 'running'){
+      await c.resume();
+    }
+
+    const o = c.createOscillator();
+    const g = c.createGain();
+    const n = c.currentTime;
+    const d = durationMs / 1000;
+
+    const attack = Math.min(.08, d * .25);
+    const release = Math.min(.22, d * .45);
+
+    o.type = 'sine';
+    o.frequency.setValueAtTime(frequency, n);
+
+    g.gain.setValueAtTime(.0001, n);
+    g.gain.exponentialRampToValueAtTime(volume, n + attack);
+    g.gain.setValueAtTime(
+      volume,
+      n + Math.max(attack, d - release)
+    );
+    g.gain.exponentialRampToValueAtTime(.0001, n + d);
+
+    o.connect(g);
+    g.connect(c.destination);
+
+    o.start(n);
+    o.stop(n + d);
+
+    return true;
+
+  }catch(e){
+    console.error(e);
+    return false;
+  }
+}
+
+/* 最初のEnterおよび課題終了時に使用する音 */
+function playEventTone(){
+  void playTone(
+    EVENT_TONE_FREQUENCY,
+    EVENT_TONE_DURATION,
+    EVENT_TONE_VOLUME
+  );
+}
+
+function startCountdown(){
+  void playTone(659.25, 500, .20);
+
+  messageDiv.textContent = '';
+
+  let n = 5;
+  countdownDiv.textContent = n;
+
+  countdownInterval = setInterval(() => {
+    n--;
+
+    countdownDiv.textContent = n > 0 ? n : '';
+
+    if(n <= 0){
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+    }
+  }, 1000);
+}
+
+function beginPreparation(taskName, nextFunction){
+  clearCommonTimers();
+
+  phase = 'preparation';
+
+  keymapDiv.style.display = 'none';
+
+  setPreparationAppearance(taskName);
+
+  countdownDiv.textContent = '';
+  messageDiv.textContent =
+    '開始まで注視点を見て待機してください';
+
+  preparationStartTimer = setTimeout(
+    startCountdown,
+    PREPARATION_DURATION - COUNTDOWN_DURATION
+  );
+
+  preparationEndTimer = setTimeout(() => {
+    clearInterval(countdownInterval);
+
+    countdownInterval = null;
+    countdownDiv.textContent = '';
+    messageDiv.textContent = '';
+
+    void playTone(880, 600, .22);
+
+    nextFunction();
+  }, PREPARATION_DURATION);
+}
+
+/*
+  PVTおよび2-backの終了時に使用する処理。
+  transitionToを呼び出した時点で終了音を鳴らす。
+*/
+function transitionTo(nextPreparation){
+  playEventTone();
+
+  phase = 'transition';
+
+  keymapDiv.style.display = 'none';
+  titleDiv.textContent = '';
+
+  stimulusDiv.className = 'stroop';
+  stimulusDiv.textContent = '終了';
+  stimulusDiv.style.color = '#111';
+
+  messageDiv.textContent = '';
+  countdownDiv.textContent = '';
+
+  setTimeout(
+    nextPreparation,
+    BETWEEN_PHASES_DURATION
+  );
+}
+
+/* 最初のEnterキー */
+document.addEventListener('keydown', async e => {
+  if(
+    e.key !== 'Enter' ||
+    e.repeat ||
+    phase !== 'initial'
+  ){
+    return;
+  }
+
   e.preventDefault();
-  phase='unlocking';
+
+  phase = 'unlocking';
+
   try{
     await unlockAudio();
-    startOverlay.style.display='none';
-    beginPreparation('PVT練習テスト',startPVT);
+
+    startOverlay.style.display = 'none';
+
+    /* 最初のEnterキー押下時の音 */
+    playEventTone();
+
+    beginPreparation(
+      'PVT練習テスト',
+      startPVT
+    );
+
   }catch(error){
-    console.error(error); phase='initial';
-    startOverlay.textContent='音声を有効にできませんでした。ページを再読み込みしてください。';
+    console.error(error);
+
+    phase = 'initial';
+
+    startOverlay.textContent =
+      '音声を有効にできませんでした。ページを再読み込みしてください。';
   }
 });
 
 /* ==================================================
    PVT
 ================================================== */
-const PVT_DURATION=30000;
-let pvtRunning=false,pvtWaiting=false,pvtStartTime=null,pvtNextStimulusTime=null;
-let pvtStimulusTimer=null,pvtEndTimer=null,pvtResults=[];
+
+const PVT_DURATION = 30000;
+
+let pvtRunning = false;
+let pvtWaiting = false;
+let pvtStartTime = null;
+let pvtNextStimulusTime = null;
+
+let pvtStimulusTimer = null;
+let pvtEndTimer = null;
+let pvtResults = [];
 
 function startPVT(){
-  phase='pvt'; pvtRunning=true; pvtResults=[];
-  messageDiv.textContent='赤になったらすぐEnterキー！';
-  pvtEndTimer=setTimeout(endPVT,PVT_DURATION);
+  phase = 'pvt';
+  pvtRunning = true;
+  pvtResults = [];
+
+  messageDiv.textContent =
+    '赤になったらすぐEnterキー！';
+
+  pvtEndTimer = setTimeout(
+    endPVT,
+    PVT_DURATION
+  );
+
   startPVTTrial();
 }
+
 function startPVTTrial(){
-  if(!pvtRunning)return;
-  clearTimeout(pvtStimulusTimer);
-  setPVTWaiting();
-  pvtWaiting=true; pvtStartTime=null;
-  const delay=Math.random()*3000+1000;
-  pvtNextStimulusTime=performance.now()+delay;
-  pvtStimulusTimer=setTimeout(()=>requestAnimationFrame(()=>{
-    if(!pvtRunning)return;
-    stimulusDiv.className='pvt-red'; stimulusDiv.textContent='Enter!';
-    pvtStartTime=performance.now(); pvtWaiting=false;
-  }),delay);
-}
-function handlePVTResponse(){
-  if(!pvtRunning)return;
-  if(pvtWaiting){
-    pvtResults.push(-Math.max(0,Math.round(pvtNextStimulusTime-performance.now())));
+  if(!pvtRunning){
     return;
   }
-  if(pvtStartTime!==null){
-    pvtResults.push(Math.round(performance.now()-pvtStartTime));
+
+  clearTimeout(pvtStimulusTimer);
+
+  setPVTWaiting();
+
+  pvtWaiting = true;
+  pvtStartTime = null;
+
+  const delay = Math.random() * 3000 + 1000;
+
+  pvtNextStimulusTime =
+    performance.now() + delay;
+
+  pvtStimulusTimer = setTimeout(() => {
+    requestAnimationFrame(() => {
+      if(!pvtRunning){
+        return;
+      }
+
+      stimulusDiv.className = 'pvt-red';
+      stimulusDiv.textContent = 'Enter!';
+
+      pvtStartTime = performance.now();
+      pvtWaiting = false;
+    });
+  }, delay);
+}
+
+function handlePVTResponse(){
+  if(!pvtRunning){
+    return;
+  }
+
+  if(pvtWaiting){
+    pvtResults.push(
+      -Math.max(
+        0,
+        Math.round(
+          pvtNextStimulusTime - performance.now()
+        )
+      )
+    );
+
+    return;
+  }
+
+  if(pvtStartTime !== null){
+    pvtResults.push(
+      Math.round(
+        performance.now() - pvtStartTime
+      )
+    );
+
     startPVTTrial();
   }
 }
+
 function endPVT(){
-  if(!pvtRunning)return;
-  pvtRunning=false; pvtWaiting=false;
-  clearTimeout(pvtStimulusTimer); clearTimeout(pvtEndTimer);
-  transitionTo(()=>beginPreparation('2-back',startTwoBack));
+  if(!pvtRunning){
+    return;
+  }
+
+  pvtRunning = false;
+  pvtWaiting = false;
+
+  clearTimeout(pvtStimulusTimer);
+  clearTimeout(pvtEndTimer);
+
+  transitionTo(() => {
+    beginPreparation(
+      '2-back',
+      startTwoBack
+    );
+  });
 }
 
 /* ==================================================
    2-back
 ================================================== */
-const TOTAL_STIMULI=50,TARGETS_PER_HALF=6,LETTER_DURATION=500,FIXATION_DURATION_2BACK=2000,RESPONSE_WINDOW=2500;
-const BASE_LETTERS=['B','F','K','H','M','Q','R','T'];
-let twoBackRunning=false,twoBackSequence=[],twoBackShown=[],twoBackIndex=0;
-let twoBackTrialStart=null,twoBackResponses=[],twoBackStimulusTimer=null,twoBackFixationTimer=null,twoBackLogs=[];
 
-function randomChoice(a){return a[Math.floor(Math.random()*a.length)];}
-function shuffleInPlace(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const TOTAL_STIMULI = 50;
+const TARGETS_PER_HALF = 6;
+const LETTER_DURATION = 500;
+const FIXATION_DURATION_2BACK = 2000;
+const RESPONSE_WINDOW = 2500;
+
+const BASE_LETTERS = [
+  'B',
+  'F',
+  'K',
+  'H',
+  'M',
+  'Q',
+  'R',
+  'T'
+];
+
+let twoBackRunning = false;
+let twoBackSequence = [];
+let twoBackShown = [];
+let twoBackIndex = 0;
+
+let twoBackTrialStart = null;
+let twoBackResponses = [];
+let twoBackStimulusTimer = null;
+let twoBackFixationTimer = null;
+let twoBackLogs = [];
+
+function randomChoice(a){
+  return a[
+    Math.floor(Math.random() * a.length)
+  ];
+}
+
+function shuffleInPlace(a){
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(
+      Math.random() * (i + 1)
+    );
+
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+
+  return a;
+}
+
 function validateTargetPositions(targets){
-  if(targets.length!==12||new Set(targets).size!==12)return false;
-  if(targets.filter(x=>x>=2&&x<=25).length!==6||targets.filter(x=>x>=26&&x<=49).length!==6)return false;
-  if(targets[0]-2>=12||49-targets.at(-1)>=12)return false;
-  for(let i=1;i<targets.length;i++)if(targets[i]-targets[i-1]-1>=12)return false;
-  for(let i=2;i<targets.length;i++)if(targets[i]===targets[i-1]+1&&targets[i-1]===targets[i-2]+1)return false;
+  if(
+    targets.length !== 12 ||
+    new Set(targets).size !== 12
+  ){
+    return false;
+  }
+
+  if(
+    targets.filter(x => x >= 2 && x <= 25).length !== 6 ||
+    targets.filter(x => x >= 26 && x <= 49).length !== 6
+  ){
+    return false;
+  }
+
+  if(
+    targets[0] - 2 >= 12 ||
+    49 - targets.at(-1) >= 12
+  ){
+    return false;
+  }
+
+  for(let i = 1; i < targets.length; i++){
+    if(
+      targets[i] -
+      targets[i - 1] -
+      1 >= 12
+    ){
+      return false;
+    }
+  }
+
+  for(let i = 2; i < targets.length; i++){
+    if(
+      targets[i] === targets[i - 1] + 1 &&
+      targets[i - 1] === targets[i - 2] + 1
+    ){
+      return false;
+    }
+  }
+
   return true;
 }
+
 function generateTargetPositions(){
-  const a=Array.from({length:24},(_,i)=>i+2),b=Array.from({length:24},(_,i)=>i+26);
-  for(let k=0;k<100000;k++){
-    shuffleInPlace(a);shuffleInPlace(b);
-    const t=[...a.slice(0,6),...b.slice(0,6)].sort((x,y)=>x-y);
-    if(validateTargetPositions(t))return new Set(t);
+  const a = Array.from(
+    {length:24},
+    (_, i) => i + 2
+  );
+
+  const b = Array.from(
+    {length:24},
+    (_, i) => i + 26
+  );
+
+  for(let k = 0; k < 100000; k++){
+    shuffleInPlace(a);
+    shuffleInPlace(b);
+
+    const t = [
+      ...a.slice(0, 6),
+      ...b.slice(0, 6)
+    ].sort((x, y) => x - y);
+
+    if(validateTargetPositions(t)){
+      return new Set(t);
+    }
   }
-  throw new Error('2-backのターゲット配置を生成できませんでした。');
+
+  throw new Error(
+    '2-backのターゲット配置を生成できませんでした。'
+  );
 }
+
 function generateTwoBackSequence(){
-  const targets=generateTargetPositions(),seq=[];
-  for(let i=0;i<TOTAL_STIMULI;i++){
+  const targets = generateTargetPositions();
+  const seq = [];
+
+  for(let i = 0; i < TOTAL_STIMULI; i++){
     let base;
-    if(i<2)base=randomChoice(BASE_LETTERS);
-    else if(targets.has(i))base=seq[i-2].toUpperCase();
-    else base=randomChoice(BASE_LETTERS.filter(x=>x!==seq[i-2].toUpperCase()));
-    seq.push(Math.random()<.5?base.toLowerCase():base);
+
+    if(i < 2){
+      base = randomChoice(BASE_LETTERS);
+
+    }else if(targets.has(i)){
+      base = seq[i - 2].toUpperCase();
+
+    }else{
+      base = randomChoice(
+        BASE_LETTERS.filter(
+          x => x !== seq[i - 2].toUpperCase()
+        )
+      );
+    }
+
+    seq.push(
+      Math.random() < .5
+        ? base.toLowerCase()
+        : base
+    );
   }
+
   return seq;
 }
+
 function startTwoBack(){
-  try{twoBackSequence=generateTwoBackSequence();}
-  catch(e){showFatalError(e.message);return;}
-  phase='twoback';twoBackRunning=true;twoBackIndex=0;twoBackShown=[];twoBackLogs=[];twoBackTrialStart=null;
-  messageDiv.textContent='2つ前の文字と一致時はEnterキーを押す';
+  try{
+    twoBackSequence =
+      generateTwoBackSequence();
+
+  }catch(e){
+    showFatalError(e.message);
+    return;
+  }
+
+  phase = 'twoback';
+
+  twoBackRunning = true;
+  twoBackIndex = 0;
+  twoBackShown = [];
+  twoBackLogs = [];
+  twoBackTrialStart = null;
+
+  messageDiv.textContent =
+    '2つ前の文字と一致時はEnterキーを押す';
+
   setTwoBackFixation();
-  twoBackFixationTimer=setTimeout(nextTwoBackTrial,FIXATION_DURATION_2BACK);
+
+  twoBackFixationTimer = setTimeout(
+    nextTwoBackTrial,
+    FIXATION_DURATION_2BACK
+  );
 }
+
 function nextTwoBackTrial(){
-  if(!twoBackRunning)return;
-  if(twoBackIndex>=TOTAL_STIMULI){endTwoBack();return;}
-  twoBackResponses=[];
-  const letter=twoBackSequence[twoBackIndex]; twoBackShown.push(letter);
-  stimulusDiv.className='twoback-letter';stimulusDiv.textContent=letter;stimulusDiv.style.color='#111';
-  twoBackTrialStart=performance.now();twoBackIndex++;
-  twoBackStimulusTimer=setTimeout(()=>{
-    if(!twoBackRunning)return;
+  if(!twoBackRunning){
+    return;
+  }
+
+  if(twoBackIndex >= TOTAL_STIMULI){
+    endTwoBack();
+    return;
+  }
+
+  twoBackResponses = [];
+
+  const letter =
+    twoBackSequence[twoBackIndex];
+
+  twoBackShown.push(letter);
+
+  stimulusDiv.className =
+    'twoback-letter';
+
+  stimulusDiv.textContent = letter;
+  stimulusDiv.style.color = '#111';
+
+  twoBackTrialStart = performance.now();
+
+  twoBackIndex++;
+
+  twoBackStimulusTimer = setTimeout(() => {
+    if(!twoBackRunning){
+      return;
+    }
+
     setTwoBackFixation();
-    twoBackFixationTimer=setTimeout(()=>{
-      if(!twoBackRunning)return;
-      evaluateTwoBackTrial();twoBackTrialStart=null;nextTwoBackTrial();
-    },FIXATION_DURATION_2BACK);
-  },LETTER_DURATION);
+
+    twoBackFixationTimer = setTimeout(() => {
+      if(!twoBackRunning){
+        return;
+      }
+
+      evaluateTwoBackTrial();
+
+      twoBackTrialStart = null;
+
+      nextTwoBackTrial();
+
+    }, FIXATION_DURATION_2BACK);
+
+  }, LETTER_DURATION);
 }
+
 function handleTwoBackResponse(){
-  if(!twoBackRunning||twoBackTrialStart===null)return;
-  const rt=Math.round(performance.now()-twoBackTrialStart);
-  if(rt>=0&&rt<RESPONSE_WINDOW)twoBackResponses.push(rt);
-}
-function evaluateTwoBackTrial(){
-  if(twoBackIndex<3)return;
-  const no=twoBackIndex-2,current=twoBackShown[twoBackIndex-1],back2=twoBackShown[twoBackIndex-3];
-  const target=current.toLowerCase()===back2.toLowerCase();
-  if(twoBackResponses.length===0)twoBackLogs.push([no,'',target?3:6]);
-  else{
-    const rt=twoBackResponses[0],code=target?(rt<=100?1:2):(rt<=100?4:5);
-    twoBackLogs.push([no,rt,code]);
-    for(let i=1;i<twoBackResponses.length;i++)twoBackLogs.push(['',-twoBackResponses[i],7]);
+  if(
+    !twoBackRunning ||
+    twoBackTrialStart === null
+  ){
+    return;
+  }
+
+  const rt = Math.round(
+    performance.now() - twoBackTrialStart
+  );
+
+  if(
+    rt >= 0 &&
+    rt < RESPONSE_WINDOW
+  ){
+    twoBackResponses.push(rt);
   }
 }
+
+function evaluateTwoBackTrial(){
+  if(twoBackIndex < 3){
+    return;
+  }
+
+  const no = twoBackIndex - 2;
+
+  const current =
+    twoBackShown[twoBackIndex - 1];
+
+  const back2 =
+    twoBackShown[twoBackIndex - 3];
+
+  const target =
+    current.toLowerCase() ===
+    back2.toLowerCase();
+
+  if(twoBackResponses.length === 0){
+    twoBackLogs.push([
+      no,
+      '',
+      target ? 3 : 6
+    ]);
+
+  }else{
+    const rt = twoBackResponses[0];
+
+    const code = target
+      ? (rt <= 100 ? 1 : 2)
+      : (rt <= 100 ? 4 : 5);
+
+    twoBackLogs.push([
+      no,
+      rt,
+      code
+    ]);
+
+    for(
+      let i = 1;
+      i < twoBackResponses.length;
+      i++
+    ){
+      twoBackLogs.push([
+        '',
+        -twoBackResponses[i],
+        7
+      ]);
+    }
+  }
+}
+
 function endTwoBack(){
-  if(!twoBackRunning)return;
-  twoBackRunning=false;twoBackTrialStart=null;
-  clearTimeout(twoBackStimulusTimer);clearTimeout(twoBackFixationTimer);
-  transitionTo(()=>beginPreparation('Stroopテスト',startStroop));
+  if(!twoBackRunning){
+    return;
+  }
+
+  twoBackRunning = false;
+  twoBackTrialStart = null;
+
+  clearTimeout(twoBackStimulusTimer);
+  clearTimeout(twoBackFixationTimer);
+
+  transitionTo(() => {
+    beginPreparation(
+      'Stroopテスト',
+      startStroop
+    );
+  });
 }
 
 /* ==================================================
    Stroop
 ================================================== */
-const STROOP_TOTAL=24,STROOP_HALF=12,STROOP_FIXATION=500,STROOP_STIMULUS=2000;
-const stroopTexts=['赤','青','緑','黄'],stroopColors=['red','blue','green','gold'];
-const keyMap={arrowup:'red',arrowleft:'blue',arrowright:'green',arrowdown:'gold'};
-let stroopRunning=false,stroopSequence=[],stroopIndex=0,currentStroop=null,stroopStart=null;
-let stroopVisible=false,stroopFirst=false,stroopDuplicate=false,stroopFixationTimer=null,stroopStimulusTimer=null;
 
-function shuffle(a){return shuffleInPlace([...a]);}
-function four(values,next){return values.length>=3&&values.at(-1)===next&&values.at(-2)===next&&values.at(-3)===next;}
-function conditionPool(){return [1,1,1,2,2,2,2,2,2,3,3,3];}
+const STROOP_TOTAL = 24;
+const STROOP_HALF = 12;
+const STROOP_FIXATION = 500;
+const STROOP_STIMULUS = 2000;
+
+const stroopTexts = [
+  '赤',
+  '青',
+  '緑',
+  '黄'
+];
+
+const stroopColors = [
+  'red',
+  'blue',
+  'green',
+  'gold'
+];
+
+const keyMap = {
+  arrowup:'red',
+  arrowleft:'blue',
+  arrowright:'green',
+  arrowdown:'gold'
+};
+
+let stroopRunning = false;
+let stroopSequence = [];
+let stroopIndex = 0;
+let currentStroop = null;
+let stroopStart = null;
+
+let stroopVisible = false;
+let stroopFirst = false;
+let stroopDuplicate = false;
+let stroopFixationTimer = null;
+let stroopStimulusTimer = null;
+
+function shuffle(a){
+  return shuffleInPlace([...a]);
+}
+
+function four(values, next){
+  return (
+    values.length >= 3 &&
+    values.at(-1) === next &&
+    values.at(-2) === next &&
+    values.at(-3) === next
+  );
+}
+
+function conditionPool(){
+  return [
+    1, 1, 1,
+    2, 2, 2, 2, 2, 2,
+    3, 3, 3
+  ];
+}
+
 function generateConditions(){
-  const all=[];
-  for(let half=0;half<2;half++){
-    let found=null;
-    for(let k=0;k<10000;k++){
-      const c=shuffle(conditionPool()),combined=[...all,...c];
-      if(!combined.some((v,i)=>i>=3&&v===combined[i-1]&&v===combined[i-2]&&v===combined[i-3])){found=c;break;}
+  const all = [];
+
+  for(let half = 0; half < 2; half++){
+    let found = null;
+
+    for(let k = 0; k < 10000; k++){
+      const c = shuffle(conditionPool());
+      const combined = [...all, ...c];
+
+      const hasFourConsecutive =
+        combined.some((v, i) => (
+          i >= 3 &&
+          v === combined[i - 1] &&
+          v === combined[i - 2] &&
+          v === combined[i - 3]
+        ));
+
+      if(!hasFourConsecutive){
+        found = c;
+        break;
+      }
     }
-    if(!found)throw new Error('Stroop条件系列を生成できませんでした。');
+
+    if(!found){
+      throw new Error(
+        'Stroop条件系列を生成できませんでした。'
+      );
+    }
+
     all.push(...found);
   }
+
   return all;
 }
+
 function stimulusCandidates(condition){
-  const a=[];
-  if(condition===1)for(let i=0;i<4;i++)a.push({condition,text:stroopTexts[i],color:stroopColors[i],id:stroopTexts[i]+'_'+stroopColors[i]});
-  if(condition===2)for(let i=0;i<4;i++)for(let j=0;j<4;j++)if(i!==j)a.push({condition,text:stroopTexts[i],color:stroopColors[j],id:stroopTexts[i]+'_'+stroopColors[j]});
-  if(condition===3)for(let i=0;i<4;i++)a.push({condition,text:'●',color:stroopColors[i],id:'●_'+stroopColors[i]});
+  const a = [];
+
+  if(condition === 1){
+    for(let i = 0; i < 4; i++){
+      a.push({
+        condition,
+        text:stroopTexts[i],
+        color:stroopColors[i],
+        id:
+          stroopTexts[i] +
+          '_' +
+          stroopColors[i]
+      });
+    }
+  }
+
+  if(condition === 2){
+    for(let i = 0; i < 4; i++){
+      for(let j = 0; j < 4; j++){
+        if(i !== j){
+          a.push({
+            condition,
+            text:stroopTexts[i],
+            color:stroopColors[j],
+            id:
+              stroopTexts[i] +
+              '_' +
+              stroopColors[j]
+          });
+        }
+      }
+    }
+  }
+
+  if(condition === 3){
+    for(let i = 0; i < 4; i++){
+      a.push({
+        condition,
+        text:'●',
+        color:stroopColors[i],
+        id:'●_' + stroopColors[i]
+      });
+    }
+  }
+
   return a;
 }
+
 function validateStroop(seq){
-  if(seq.length!==24)return false;
-  const count=s=>s.reduce((o,t)=>(o[t.condition]++,o),{1:0,2:0,3:0});
-  for(const half of [seq.slice(0,12),seq.slice(12)]){const c=count(half);if(c[1]!==3||c[2]!==6||c[3]!==3)return false;}
-  for(let i=1;i<seq.length;i++){
-    if(seq[i].id===seq[i-1].id)return false;
-    if(i>=3){
-      if(seq[i].condition===seq[i-1].condition&&seq[i].condition===seq[i-2].condition&&seq[i].condition===seq[i-3].condition)return false;
-      if(seq[i].color===seq[i-1].color&&seq[i].color===seq[i-2].color&&seq[i].color===seq[i-3].color)return false;
+  if(seq.length !== 24){
+    return false;
+  }
+
+  const count = s => s.reduce(
+    (o, t) => {
+      o[t.condition]++;
+      return o;
+    },
+    {1:0, 2:0, 3:0}
+  );
+
+  for(
+    const half of [
+      seq.slice(0, 12),
+      seq.slice(12)
+    ]
+  ){
+    const c = count(half);
+
+    if(
+      c[1] !== 3 ||
+      c[2] !== 6 ||
+      c[3] !== 3
+    ){
+      return false;
     }
   }
+
+  for(let i = 1; i < seq.length; i++){
+    if(seq[i].id === seq[i - 1].id){
+      return false;
+    }
+
+    if(i >= 3){
+      if(
+        seq[i].condition === seq[i - 1].condition &&
+        seq[i].condition === seq[i - 2].condition &&
+        seq[i].condition === seq[i - 3].condition
+      ){
+        return false;
+      }
+
+      if(
+        seq[i].color === seq[i - 1].color &&
+        seq[i].color === seq[i - 2].color &&
+        seq[i].color === seq[i - 3].color
+      ){
+        return false;
+      }
+    }
+  }
+
   return true;
 }
+
 function generateStroopSequence(){
-  for(let attempt=0;attempt<10000;attempt++){
-    const conditions=generateConditions(),trials=[];let failed=false;
+  for(
+    let attempt = 0;
+    attempt < 10000;
+    attempt++
+  ){
+    const conditions =
+      generateConditions();
+
+    const trials = [];
+    let failed = false;
+
     for(const condition of conditions){
-      const selected=shuffle(stimulusCandidates(condition)).find(x=>{
-        const prev=trials.at(-1);return (!prev||prev.id!==x.id)&&!four(trials.map(t=>t.color),x.color);
-      });
-      if(!selected){failed=true;break;}trials.push({...selected});
+      const selected =
+        shuffle(
+          stimulusCandidates(condition)
+        ).find(x => {
+          const prev = trials.at(-1);
+
+          return (
+            (!prev || prev.id !== x.id) &&
+            !four(
+              trials.map(t => t.color),
+              x.color
+            )
+          );
+        });
+
+      if(!selected){
+        failed = true;
+        break;
+      }
+
+      trials.push({...selected});
     }
-    if(!failed&&validateStroop(trials))return trials;
+
+    if(
+      !failed &&
+      validateStroop(trials)
+    ){
+      return trials;
+    }
   }
-  throw new Error('Stroop刺激系列を生成できませんでした。');
+
+  throw new Error(
+    'Stroop刺激系列を生成できませんでした。'
+  );
 }
+
 function startStroop(){
-  try{stroopSequence=generateStroopSequence();}
-  catch(e){showFatalError(e.message);return;}
-  phase='stroop';stroopRunning=true;stroopIndex=0;
-  keymapDiv.style.display='flex';messageDiv.textContent='文字の色に対応する矢印キーを押す';
+  try{
+    stroopSequence =
+      generateStroopSequence();
+
+  }catch(e){
+    showFatalError(e.message);
+    return;
+  }
+
+  phase = 'stroop';
+
+  stroopRunning = true;
+  stroopIndex = 0;
+
+  keymapDiv.style.display = 'flex';
+
+  messageDiv.textContent =
+    '文字の色に対応する矢印キーを押す';
+
   showStroopFixation();
 }
+
 function showStroopFixation(){
-  if(!stroopRunning)return;
-  if(stroopIndex>=STROOP_TOTAL){endStroop();return;}
-  currentStroop=null;stroopVisible=false;setStroopFixation();
-  stroopFixationTimer=setTimeout(showStroopStimulus,STROOP_FIXATION);
+  if(!stroopRunning){
+    return;
+  }
+
+  if(stroopIndex >= STROOP_TOTAL){
+    endStroop();
+    return;
+  }
+
+  currentStroop = null;
+  stroopVisible = false;
+
+  setStroopFixation();
+
+  stroopFixationTimer = setTimeout(
+    showStroopStimulus,
+    STROOP_FIXATION
+  );
 }
+
 function showStroopStimulus(){
-  if(!stroopRunning)return;
-  currentStroop=stroopSequence[stroopIndex];stroopFirst=false;stroopDuplicate=false;
-  stimulusDiv.className='stroop';stimulusDiv.textContent=currentStroop.text;stimulusDiv.style.color=currentStroop.color;
-  stroopStart=performance.now();stroopVisible=true;
-  stroopStimulusTimer=setTimeout(finishStroopTrial,STROOP_STIMULUS);
+  if(!stroopRunning){
+    return;
+  }
+
+  currentStroop =
+    stroopSequence[stroopIndex];
+
+  stroopFirst = false;
+  stroopDuplicate = false;
+
+  stimulusDiv.className = 'stroop';
+  stimulusDiv.textContent =
+    currentStroop.text;
+
+  stimulusDiv.style.color =
+    currentStroop.color;
+
+  stroopStart = performance.now();
+  stroopVisible = true;
+
+  stroopStimulusTimer = setTimeout(
+    finishStroopTrial,
+    STROOP_STIMULUS
+  );
 }
+
 function handleStroopResponse(e){
-  if(!stroopRunning||!stroopVisible||e.repeat)return;
-  const key=e.key.toLowerCase();if(!(key in keyMap))return;
-  e.preventDefault();const rt=Math.round(performance.now()-stroopStart);
-  if(rt<0||rt>STROOP_STIMULUS)return;
+  if(
+    !stroopRunning ||
+    !stroopVisible ||
+    e.repeat
+  ){
+    return;
+  }
+
+  const key = e.key.toLowerCase();
+
+  if(!(key in keyMap)){
+    return;
+  }
+
+  e.preventDefault();
+
+  const rt = Math.round(
+    performance.now() - stroopStart
+  );
+
+  if(
+    rt < 0 ||
+    rt > STROOP_STIMULUS
+  ){
+    return;
+  }
+
   if(!stroopFirst){
-    stroopFirst=true;currentStroop.firstRT=rt;currentStroop.firstAnswer=keyMap[key];
-    currentStroop.correct=keyMap[key]===currentStroop.color?1:0;
-    currentStroop.code=rt<=100?3:(currentStroop.correct?1:2);
-  }else stroopDuplicate=true;
+    stroopFirst = true;
+
+    currentStroop.firstRT = rt;
+    currentStroop.firstAnswer =
+      keyMap[key];
+
+    currentStroop.correct =
+      keyMap[key] === currentStroop.color
+        ? 1
+        : 0;
+
+    currentStroop.code =
+      rt <= 100
+        ? 3
+        : (
+            currentStroop.correct
+              ? 1
+              : 2
+          );
+
+  }else{
+    stroopDuplicate = true;
+  }
 }
+
 function finishStroopTrial(){
-  if(!stroopRunning||!currentStroop)return;
-  stroopVisible=false;if(!stroopFirst)currentStroop.code=4;if(stroopDuplicate)currentStroop.code=5;
-  stroopIndex++;showStroopFixation();
+  if(
+    !stroopRunning ||
+    !currentStroop
+  ){
+    return;
+  }
+
+  stroopVisible = false;
+
+  if(!stroopFirst){
+    currentStroop.code = 4;
+  }
+
+  if(stroopDuplicate){
+    currentStroop.code = 5;
+  }
+
+  stroopIndex++;
+
+  showStroopFixation();
 }
+
 function endStroop(){
-  if(!stroopRunning)return;
-  stroopRunning=false;stroopVisible=false;
-  clearTimeout(stroopFixationTimer);clearTimeout(stroopStimulusTimer);
-  phase='finished';keymapDiv.style.display='none';titleDiv.textContent='Stroopテスト';
-  stimulusDiv.className='stroop';stimulusDiv.textContent='終了！';stimulusDiv.style.color='#111';
-  messageDiv.textContent='';countdownDiv.textContent='';
+  if(!stroopRunning){
+    return;
+  }
+
+  stroopRunning = false;
+  stroopVisible = false;
+
+  clearTimeout(stroopFixationTimer);
+  clearTimeout(stroopStimulusTimer);
+
+  /* 最後のStroop課題終了時の音 */
+  playEventTone();
+
+  phase = 'finished';
+
+  keymapDiv.style.display = 'none';
+
+  titleDiv.textContent =
+    'Stroopテスト';
+
+  stimulusDiv.className = 'stroop';
+  stimulusDiv.textContent = '終了！';
+  stimulusDiv.style.color = '#111';
+
+  messageDiv.textContent = '';
+  countdownDiv.textContent = '';
 }
 
 /* ==================================================
    入力の振り分け
 ================================================== */
-document.addEventListener('keydown',e=>{
-  if(e.key==='Enter'){
-    if(keyLocked||e.repeat)return;
-    keyLocked=true;
-    if(phase==='pvt')handlePVTResponse();
-    else if(phase==='twoback')handleTwoBackResponse();
-  }else if(phase==='stroop')handleStroopResponse(e);
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Enter'){
+    if(keyLocked || e.repeat){
+      return;
+    }
+
+    keyLocked = true;
+
+    if(phase === 'pvt'){
+      handlePVTResponse();
+
+    }else if(phase === 'twoback'){
+      handleTwoBackResponse();
+    }
+
+  }else if(phase === 'stroop'){
+    handleStroopResponse(e);
+  }
 });
-document.addEventListener('keyup',e=>{if(e.key==='Enter')keyLocked=false;});
+
+document.addEventListener('keyup', e => {
+  if(e.key === 'Enter'){
+    keyLocked = false;
+  }
+});
+
+/* ==================================================
+   エラー表示
+================================================== */
 
 function showFatalError(text){
-  phase='error';clearCommonTimers();
-  pvtRunning=twoBackRunning=stroopRunning=false;
-  keymapDiv.style.display='none';titleDiv.textContent='エラー';setStroopFixation();messageDiv.textContent=text;
+  phase = 'error';
+
+  clearCommonTimers();
+
+  pvtRunning = false;
+  twoBackRunning = false;
+  stroopRunning = false;
+
+  keymapDiv.style.display = 'none';
+  titleDiv.textContent = 'エラー';
+
+  setStroopFixation();
+
+  messageDiv.textContent = text;
 }
 </script>
+
 </body>
 </html>
