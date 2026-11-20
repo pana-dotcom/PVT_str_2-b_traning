@@ -49,7 +49,7 @@ body{
   user-select:none;
 }
 
-/* PVT: 元コードと同じ300×200 pxの灰色ボックス */
+/* PVT */
 #stimulus.pvt-waiting{
   width:300px;
   height:200px;
@@ -68,7 +68,7 @@ body{
   margin:auto;
 }
 
-/* 2-back: 元コードと同じ120×120 px、灰色・白文字・角丸 */
+/* 2-back */
 #stimulus.twoback-fixation{
   width:120px;
   height:120px;
@@ -89,7 +89,7 @@ body{
   font-size:80px;
 }
 
-/* Stroop: 元コードと同じ固定高80 pxの刺激表示領域 */
+/* Stroop */
 #stimulus.stroop{
   width:100%;
   height:80px;
@@ -179,7 +179,12 @@ const PREPARATION_DURATION = 30000;
 const COUNTDOWN_DURATION = 5000;
 const BETWEEN_PHASES_DURATION = 2000;
 
-/* 最初のEnterおよび各課題終了時の音 */
+/* タスク開始5秒前および最初のEnter時の音 */
+const WARNING_TONE_FREQUENCY = 659.25;
+const WARNING_TONE_DURATION = 500;
+const WARNING_TONE_VOLUME = .20;
+
+/* 各タスク開始時および終了時の音 */
 const EVENT_TONE_FREQUENCY = 880;
 const EVENT_TONE_DURATION = 600;
 const EVENT_TONE_VOLUME = .22;
@@ -315,12 +320,20 @@ async function playTone(frequency, durationMs, volume = .22){
     o.frequency.setValueAtTime(frequency, n);
 
     g.gain.setValueAtTime(.0001, n);
-    g.gain.exponentialRampToValueAtTime(volume, n + attack);
+    g.gain.exponentialRampToValueAtTime(
+      volume,
+      n + attack
+    );
+
     g.gain.setValueAtTime(
       volume,
       n + Math.max(attack, d - release)
     );
-    g.gain.exponentialRampToValueAtTime(.0001, n + d);
+
+    g.gain.exponentialRampToValueAtTime(
+      .0001,
+      n + d
+    );
 
     o.connect(g);
     g.connect(c.destination);
@@ -336,7 +349,16 @@ async function playTone(frequency, durationMs, volume = .22){
   }
 }
 
-/* 最初のEnterおよび課題終了時に使用する音 */
+/* タスク開始5秒前および最初のEnter時の音 */
+function playWarningTone(){
+  void playTone(
+    WARNING_TONE_FREQUENCY,
+    WARNING_TONE_DURATION,
+    WARNING_TONE_VOLUME
+  );
+}
+
+/* タスク開始時および終了時の音 */
 function playEventTone(){
   void playTone(
     EVENT_TONE_FREQUENCY,
@@ -346,7 +368,7 @@ function playEventTone(){
 }
 
 function startCountdown(){
-  void playTone(659.25, 500, .20);
+  playWarningTone();
 
   messageDiv.textContent = '';
 
@@ -356,7 +378,8 @@ function startCountdown(){
   countdownInterval = setInterval(() => {
     n--;
 
-    countdownDiv.textContent = n > 0 ? n : '';
+    countdownDiv.textContent =
+      n > 0 ? n : '';
 
     if(n <= 0){
       clearInterval(countdownInterval);
@@ -369,7 +392,6 @@ function beginPreparation(taskName, nextFunction){
   clearCommonTimers();
 
   phase = 'preparation';
-
   keymapDiv.style.display = 'none';
 
   setPreparationAppearance(taskName);
@@ -385,21 +407,18 @@ function beginPreparation(taskName, nextFunction){
 
   preparationEndTimer = setTimeout(() => {
     clearInterval(countdownInterval);
-
     countdownInterval = null;
+
     countdownDiv.textContent = '';
     messageDiv.textContent = '';
 
-    void playTone(880, 600, .22);
+    playEventTone();
 
     nextFunction();
   }, PREPARATION_DURATION);
 }
 
-/*
-  PVTおよび2-backの終了時に使用する処理。
-  transitionToを呼び出した時点で終了音を鳴らす。
-*/
+/* PVTおよび2-back終了時の処理 */
 function transitionTo(nextPreparation){
   playEventTone();
 
@@ -432,7 +451,6 @@ document.addEventListener('keydown', async e => {
   }
 
   e.preventDefault();
-
   phase = 'unlocking';
 
   try{
@@ -440,8 +458,11 @@ document.addEventListener('keydown', async e => {
 
     startOverlay.style.display = 'none';
 
-    /* 最初のEnterキー押下時の音 */
-    playEventTone();
+    /*
+      最初のEnterキー押下時は、
+      タスク開始5秒前と同じ音を鳴らす
+    */
+    playWarningTone();
 
     beginPreparation(
       'PVT練習テスト',
@@ -501,7 +522,8 @@ function startPVTTrial(){
   pvtWaiting = true;
   pvtStartTime = null;
 
-  const delay = Math.random() * 3000 + 1000;
+  const delay =
+    Math.random() * 3000 + 1000;
 
   pvtNextStimulusTime =
     performance.now() + delay;
@@ -531,7 +553,8 @@ function handlePVTResponse(){
       -Math.max(
         0,
         Math.round(
-          pvtNextStimulusTime - performance.now()
+          pvtNextStimulusTime -
+          performance.now()
         )
       )
     );
@@ -542,7 +565,8 @@ function handlePVTResponse(){
   if(pvtStartTime !== null){
     pvtResults.push(
       Math.round(
-        performance.now() - pvtStartTime
+        performance.now() -
+        pvtStartTime
       )
     );
 
@@ -628,8 +652,12 @@ function validateTargetPositions(targets){
   }
 
   if(
-    targets.filter(x => x >= 2 && x <= 25).length !== 6 ||
-    targets.filter(x => x >= 26 && x <= 49).length !== 6
+    targets.filter(
+      x => x >= 2 && x <= 25
+    ).length !== 6 ||
+    targets.filter(
+      x => x >= 26 && x <= 49
+    ).length !== 6
   ){
     return false;
   }
@@ -653,8 +681,10 @@ function validateTargetPositions(targets){
 
   for(let i = 2; i < targets.length; i++){
     if(
-      targets[i] === targets[i - 1] + 1 &&
-      targets[i - 1] === targets[i - 2] + 1
+      targets[i] ===
+        targets[i - 1] + 1 &&
+      targets[i - 1] ===
+        targets[i - 2] + 1
     ){
       return false;
     }
@@ -694,7 +724,9 @@ function generateTargetPositions(){
 }
 
 function generateTwoBackSequence(){
-  const targets = generateTargetPositions();
+  const targets =
+    generateTargetPositions();
+
   const seq = [];
 
   for(let i = 0; i < TOTAL_STIMULI; i++){
@@ -704,12 +736,15 @@ function generateTwoBackSequence(){
       base = randomChoice(BASE_LETTERS);
 
     }else if(targets.has(i)){
-      base = seq[i - 2].toUpperCase();
+      base =
+        seq[i - 2].toUpperCase();
 
     }else{
       base = randomChoice(
         BASE_LETTERS.filter(
-          x => x !== seq[i - 2].toUpperCase()
+          x =>
+            x !==
+            seq[i - 2].toUpperCase()
         )
       );
     }
@@ -776,31 +811,34 @@ function nextTwoBackTrial(){
   stimulusDiv.textContent = letter;
   stimulusDiv.style.color = '#111';
 
-  twoBackTrialStart = performance.now();
+  twoBackTrialStart =
+    performance.now();
 
   twoBackIndex++;
 
-  twoBackStimulusTimer = setTimeout(() => {
-    if(!twoBackRunning){
-      return;
-    }
-
-    setTwoBackFixation();
-
-    twoBackFixationTimer = setTimeout(() => {
+  twoBackStimulusTimer =
+    setTimeout(() => {
       if(!twoBackRunning){
         return;
       }
 
-      evaluateTwoBackTrial();
+      setTwoBackFixation();
 
-      twoBackTrialStart = null;
+      twoBackFixationTimer =
+        setTimeout(() => {
+          if(!twoBackRunning){
+            return;
+          }
 
-      nextTwoBackTrial();
+          evaluateTwoBackTrial();
 
-    }, FIXATION_DURATION_2BACK);
+          twoBackTrialStart = null;
 
-  }, LETTER_DURATION);
+          nextTwoBackTrial();
+
+        }, FIXATION_DURATION_2BACK);
+
+    }, LETTER_DURATION);
 }
 
 function handleTwoBackResponse(){
@@ -812,7 +850,8 @@ function handleTwoBackResponse(){
   }
 
   const rt = Math.round(
-    performance.now() - twoBackTrialStart
+    performance.now() -
+    twoBackTrialStart
   );
 
   if(
@@ -831,10 +870,14 @@ function evaluateTwoBackTrial(){
   const no = twoBackIndex - 2;
 
   const current =
-    twoBackShown[twoBackIndex - 1];
+    twoBackShown[
+      twoBackIndex - 1
+    ];
 
   const back2 =
-    twoBackShown[twoBackIndex - 3];
+    twoBackShown[
+      twoBackIndex - 3
+    ];
 
   const target =
     current.toLowerCase() ===
@@ -848,7 +891,8 @@ function evaluateTwoBackTrial(){
     ]);
 
   }else{
-    const rt = twoBackResponses[0];
+    const rt =
+      twoBackResponses[0];
 
     const code = target
       ? (rt <= 100 ? 1 : 2)
@@ -882,8 +926,13 @@ function endTwoBack(){
   twoBackRunning = false;
   twoBackTrialStart = null;
 
-  clearTimeout(twoBackStimulusTimer);
-  clearTimeout(twoBackFixationTimer);
+  clearTimeout(
+    twoBackStimulusTimer
+  );
+
+  clearTimeout(
+    twoBackFixationTimer
+  );
 
   transitionTo(() => {
     beginPreparation(
@@ -963,8 +1012,11 @@ function generateConditions(){
     let found = null;
 
     for(let k = 0; k < 10000; k++){
-      const c = shuffle(conditionPool());
-      const combined = [...all, ...c];
+      const c =
+        shuffle(conditionPool());
+
+      const combined =
+        [...all, ...c];
 
       const hasFourConsecutive =
         combined.some((v, i) => (
@@ -1072,23 +1124,32 @@ function validateStroop(seq){
   }
 
   for(let i = 1; i < seq.length; i++){
-    if(seq[i].id === seq[i - 1].id){
+    if(
+      seq[i].id ===
+      seq[i - 1].id
+    ){
       return false;
     }
 
     if(i >= 3){
       if(
-        seq[i].condition === seq[i - 1].condition &&
-        seq[i].condition === seq[i - 2].condition &&
-        seq[i].condition === seq[i - 3].condition
+        seq[i].condition ===
+          seq[i - 1].condition &&
+        seq[i].condition ===
+          seq[i - 2].condition &&
+        seq[i].condition ===
+          seq[i - 3].condition
       ){
         return false;
       }
 
       if(
-        seq[i].color === seq[i - 1].color &&
-        seq[i].color === seq[i - 2].color &&
-        seq[i].color === seq[i - 3].color
+        seq[i].color ===
+          seq[i - 1].color &&
+        seq[i].color ===
+          seq[i - 2].color &&
+        seq[i].color ===
+          seq[i - 3].color
       ){
         return false;
       }
@@ -1111,20 +1172,19 @@ function generateStroopSequence(){
     let failed = false;
 
     for(const condition of conditions){
-      const selected =
-        shuffle(
-          stimulusCandidates(condition)
-        ).find(x => {
-          const prev = trials.at(-1);
+      const selected = shuffle(
+        stimulusCandidates(condition)
+      ).find(x => {
+        const prev = trials.at(-1);
 
-          return (
-            (!prev || prev.id !== x.id) &&
-            !four(
-              trials.map(t => t.color),
-              x.color
-            )
-          );
-        });
+        return (
+          (!prev || prev.id !== x.id) &&
+          !four(
+            trials.map(t => t.color),
+            x.color
+          )
+        );
+      });
 
       if(!selected){
         failed = true;
@@ -1203,6 +1263,7 @@ function showStroopStimulus(){
   stroopDuplicate = false;
 
   stimulusDiv.className = 'stroop';
+
   stimulusDiv.textContent =
     currentStroop.text;
 
@@ -1236,7 +1297,8 @@ function handleStroopResponse(e){
   e.preventDefault();
 
   const rt = Math.round(
-    performance.now() - stroopStart
+    performance.now() -
+    stroopStart
   );
 
   if(
@@ -1250,11 +1312,13 @@ function handleStroopResponse(e){
     stroopFirst = true;
 
     currentStroop.firstRT = rt;
+
     currentStroop.firstAnswer =
       keyMap[key];
 
     currentStroop.correct =
-      keyMap[key] === currentStroop.color
+      keyMap[key] ===
+      currentStroop.color
         ? 1
         : 0;
 
@@ -1303,10 +1367,15 @@ function endStroop(){
   stroopRunning = false;
   stroopVisible = false;
 
-  clearTimeout(stroopFixationTimer);
-  clearTimeout(stroopStimulusTimer);
+  clearTimeout(
+    stroopFixationTimer
+  );
 
-  /* 最後のStroop課題終了時の音 */
+  clearTimeout(
+    stroopStimulusTimer
+  );
+
+  /* Stroop終了時の音 */
   playEventTone();
 
   phase = 'finished';
